@@ -163,18 +163,14 @@ io.on('connection', function (socket) {
         // });
     });
 
-
     socket.on('file_upload_sending_admin', function (alldata) {
-
         var client_data = {
             to: alldata.to,
             from: alldata.from,
             message: alldata.filedata.message
         };
-
         io.to(client_data.from).emit('live_chat', client_data);
         io.to(client_data.to).emit('live_chat', client_data);
-
     });
 
 

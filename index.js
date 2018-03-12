@@ -184,10 +184,12 @@ io.on('connection', function (socket) {
     });
 
     socket.on('logoutchangestatus',function (id) {
-        io.to('admin1').emit('onlineoffline',id);
+        io.to('admin1').emit('offline',id);
     });
 
-
+    socket.on('loginevent',function (id) {
+        io.to('admin1').emit('online',id);
+    });
     socket.on('file_upload_sending_admin', function (alldata) {
 
         var client_data = {

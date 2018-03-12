@@ -11,8 +11,8 @@ var mysql = require('mysql');
 //     password: "",
 //     database: "zarathemes"
 // });
-
-
+//
+//
 // con.connect(function (error) {
 //     if (!!error) {
 //         console.log('Error');
@@ -20,7 +20,7 @@ var mysql = require('mysql');
 //         //console.log('Connected');
 //     }
 // });
-
+// var base_url = 'https://192.168.0.133/zarathemes/';
 // app.get('/', function(req, res){
 //     res.sendFile(__dirname + '/index.html');
 // });
@@ -49,6 +49,26 @@ io.on('connection', function (socket) {
         //console.log(client_data);
         io.to(namedata.client_data.from).emit('incoming message',namedata.client_data);
         io.to(namedata.client_data.to).emit('incoming message', namedata);
+
+    });
+
+
+    socket.on('disconnect', function() {
+        if(socket.handshake.query.userid!=undefined){
+            console.log('disconnected '+socket.handshake.query.userid);
+
+            users[socket.handshake.query.userid]--;
+
+               auto_logout(socket.handshake.query.userid);
+
+
+
+
+            //console.log("kyada users are "+users[socket.handshake.query.username].length);
+            //console.table(socket);
+        }
+
+
 
     });
 
@@ -163,16 +183,47 @@ io.on('connection', function (socket) {
         // });
     });
 
+    socket.on('logoutchangestatus',function (id) {
+        io.to('admin1').emit('onlineoffline',id);
+    });
+
+
     socket.on('file_upload_sending_admin', function (alldata) {
+
         var client_data = {
             to: alldata.to,
             from: alldata.from,
             message: alldata.filedata.message
         };
+
         io.to(client_data.from).emit('live_chat', client_data);
         io.to(client_data.to).emit('live_chat', client_data);
+
     });
 
+    function auto_logout(user_handshake){
+        console.log(user_handshake);
+
+        if(user_handshake=='admin1'){
+            //console.log('this will logout '+user_handshake);
+        }else {
+
+            //setTimeout(function () {
+            //var id = user_handshake;
+            console.log('this will logout '+user_handshake);
+
+            //io.to(user_handshake).emit('autologout',user_handshake);
+            //con.query("UPDATE users set status='0',designation='kallia' WHERE id='"+id+"'");
+             //con.query("UPDATE user set user_online='0' WHERE user_id='"+user_handshake+"'");
+            // con.query("UPDATE tasks set divert_time='0000-00-00 00:00:00', task_status='0', final_status='pause' WHERE worker_id='"+id+"' and task_status='1' and ( final_status='start' or final_status='resume' or final_status='start_again') ");
+
+            //con.query("SELECT * FROM users where id='"+id+"'");
+
+            //}, 10000);
+
+        }
+
+    }
 
 });
 
@@ -180,4 +231,5 @@ io.on('connection', function (socket) {
 http.listen(port, function () {
     console.log('listening on *:' + port);
 });
+
 

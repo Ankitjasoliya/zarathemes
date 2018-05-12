@@ -1,8 +1,14 @@
 var app = require('express')();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
+//var p2p = require('socket.io-p2p-server')(http);
 var port = process.env.PORT || 3839;
 var mergeJSON = require("merge-json");
+var Log = require('log');
+    log =  new Log('debug');
+
+//io.use(p2p);
+
 
 var mysql = require('mysql');
 // var con = mysql.createConnection({
@@ -26,7 +32,7 @@ var mysql = require('mysql');
 // });
 var users = {};
 //var admin = {};
-io.on('connection', function (socket) {
+io.on('connection',function(socket) {
     //console.log(socket);
     // if (socket.handshake.query.userid == undefined) {
     //     admin[socket.handshake.query.admin] = new Array();
@@ -39,7 +45,7 @@ io.on('connection', function (socket) {
         users[socket.handshake.query.userid] = socket;
         socket.join(socket.handshake.query.userid);
         //users[socket.handshake.query.userid][0] = socket;
-        console.log('connected ' + socket.handshake.query.userid);
+        //console.log('connected ' + socket.handshake.query.userid);
     // }
 
 
@@ -48,14 +54,14 @@ io.on('connection', function (socket) {
         //console.log(users);
         //console.log(client_data);
         io.to(namedata.client_data.from).emit('incoming message',namedata.client_data);
-        io.to(namedata.client_data.to).emit('incoming message', namedata);
+        io.to(namedata.client_data.to).emit('incoming message',namedata);
 
     });
 
 
     socket.on('disconnect', function() {
         if(socket.handshake.query.userid!=undefined){
-            console.log('disconnected '+socket.handshake.query.userid);
+            //console.log('disconnected '+socket.handshake.query.userid);
 
             users[socket.handshake.query.userid]--;
 
@@ -116,6 +122,7 @@ io.on('connection', function (socket) {
 
 
     socket.on('sendmessage admin', function (data) {
+
         // //console.log(data);
         // var query = "INSERT INTO chat (sender,receiver,message) VALUES (";
         // query += " '" + data.from + "',";
@@ -204,7 +211,7 @@ io.on('connection', function (socket) {
     });
 
     function auto_logout(user_handshake){
-        console.log(user_handshake);
+        //console.log(user_handshake);
 
         if(user_handshake=='admin1'){
             //console.log('this will logout '+user_handshake);
@@ -212,7 +219,7 @@ io.on('connection', function (socket) {
 
             //setTimeout(function () {
             //var id = user_handshake;
-            console.log('this will logout '+user_handshake);
+            //console.log('this will logout '+user_handshake);
 
             //io.to(user_handshake).emit('autologout',user_handshake);
             //con.query("UPDATE users set status='0',designation='kallia' WHERE id='"+id+"'");
@@ -226,6 +233,15 @@ io.on('connection', function (socket) {
         }
 
     }
+
+    socket.on('stream',function(imagedata){
+        //console.log(imagedata.to);
+        socket.to(imagedata.to).emit('stream',imagedata.image);
+    });
+
+
+
+
 
 });
 
